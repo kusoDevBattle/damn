@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./css/ress.min.css">
+  <link rel="stylesheet" href="./css/shooting.css">
+  <script src="./js/jquery-3.1.1.min.js"></script>
+  <script src="./js/vue.js"></script>
+  <script src="./js/babel.min.js"></script>
+  <script src="./js/build.js"></script>
+  <title>ひこうき</title>
+</head>
+<body>
+<div id="app" class="field">
+  <div id="target" class="target"></div>
+  <div id="plane" class="plane" v-bind:style="{left: planePos + 'px'}"></div>
+  <textarea class="controller" @keydown.prevent="controller"></textarea>
+</div>
+</body>
+</html>

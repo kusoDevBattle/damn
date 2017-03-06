@@ -1,0 +1,72 @@
+.field {
+  position: relative;
+  background-image: url(../img/sky.png);
+  background-repeat: repeat;
+  height: 100vh;
+  min-height: 500px;
+}
+
+.target {
+  position: absolute;
+  top: 10px;
+  left: calc(50% - 167px);
+  width: 335px;
+  height: 250px;
+  max-height: 100%;
+  background: url(../img/rock.png) no-repeat;
+  background-size: cover;
+  animation-duration: 2s;
+  animation-name: flow;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  transition: left 0.5s;
+}
+
+.plane {
+  position: absolute;
+  bottom: 5px;
+  left: calc(50% - 50px);
+  width: 100px;
+  height: 190px;
+  max-height: 100%;
+  background: url(../img/plane.png) no-repeat;
+  background-size: cover;
+}
+
+.barrett {
+  width: 20px;
+  height: 50px;
+  position: absolute;
+  border-radius: 100px;
+  background-color: #345C69;
+  animation-name: shoot;
+  animation-iteration-count: 1;
+  animation-duration: 1s;
+}
+
+.controller {
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+}
+
+
+@keyframes flow {
+  0% {
+    margin-top: 0px;
+  }
+
+  50% {
+    margin-top: 10px;
+  }
+}
+
+@keyframes shoot {
+  0% {
+    margin-top: 0px;
+  }
+
+  100% {
+    margin-top: -150vh;
+  }
+}
