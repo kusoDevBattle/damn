@@ -4,14 +4,35 @@ new Vue({
   data: {
     speed: 10,
     barrett: '<div class="barrett" />',
-    planePos: 'calc(50% - 50px)',
-    planeWidth: $('#plane').width()
+    planePos: '',
+    barrettAdjust: {
+      top: 50,
+      left: 20
+    }
+  },
+  mounted: function(){
+    this.setParameters();
+    this.bindEvent();
   },
   methods: {
+    setParameters: function(){
+      this.$plane = $('#plane');
+      this.$target = $('#target');
+      this.planeWidth = this.$plane.width();
+      this.targetWidth = this.$target.width();
+      this.targetAdjustWidth = this.targetWidth / 2;
+      this.targetDefaultPos = `calc(50% - ${this.targetAdjustWidth}px)`
+    },
+    bindEvent: function(){
+      this.$target.on('transitionend webkitTransitionEnd', () => {
+        this.resetTargetPos();
+      });
+    },
+    resetTargetPos: function(){
+      this.$target.css('left', this.targetDefaultPos);
+    },
     controller: function(e){
       const key = e.which;
-
-      this.$target = $('#target');
 
       // 13: enter, 32: space, 90: z
       if([13, 32, 90].includes(key)) {
@@ -19,14 +40,13 @@ new Vue({
         this.avoidTarget();
       }
 
-      // 37: left, 39: right
-      if([37, 39].includes(key)) {
+      // 37: left, 39: right, 72: h, 76: l
+      if([37, 39, 72, 76].includes(key)) {
         this.slide(key);
       }
     },
     avoidTarget: function() {
       const random = this.getRandom(0, 2);
-      let timer;
 
       switch (random) {
         case 0:
@@ -36,9 +56,9 @@ new Vue({
           this.slideTarget('100vw');
           break;
         case 2:
-          clearTimeout(timer);
+          clearTimeout(this.timer);
           this.$target.css('opacity', '0');
-          timer = setTimeout(() => {
+          this.timer = setTimeout(() => {
               this.$target.css('opacity', '1');
           }, 300);
           break;
@@ -79,11 +99,11 @@ new Vue({
       return [R, G, B];
     },
     slide: function(key) {
-      this.planePos = $('#plane').position().left;
+      this.planePos = this.$plane.position().left;
 
-      if(key === 37) {
+      if([37, 72].includes(key)) {
         this.planePos += -this.speed;
-      } else if(key === 39) {
+      } else if([39, 76].includes(key)) {
         this.planePos += this.speed;
       }
 
@@ -100,10 +120,4 @@ new Vue({
       }
     }
   }
-});
-
-const $target = $('#target');
-
-$target.on('transitionend webkitTransitionEnd', function(){
-  $target.css({left: 'calc(50% - 167px)'});
 });
