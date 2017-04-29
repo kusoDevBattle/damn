@@ -13,9 +13,8 @@
 </head>
 <body>
 <div id="app" class="field">
-  <div id="target" class="target"></div>
-  <div id="plane" class="plane" v-bind:style="{left: planePos + 'px'}"></div>
-  <textarea class="controller" @keydown.prevent="controller"></textarea>
+  <shooting-object></shooting-object>
+  <shooting-plane></shooting-plane>
 </div>
 </body>
 </html>
