@@ -1,10 +1,5 @@
 const Barrett = Vue.extend({
-    template: '<div class="barrett" :class="{ isShooting: isShooting }" @animationend="removeBarrett"></div>',
-    data: function() {
-        return {
-            isShooting: false
-        };
-    },
+    template: '<div class="barrett" :class="{ isShooting: isShooting }" :style="{ top: topPos, left: leftPos, backgroundColor: bgColor }" @animationend="removeBarrett"></div>',
     props: {
         barretAdjust: {
             type: Object,
@@ -14,27 +9,40 @@ const Barrett = Vue.extend({
                     left: 80
                 };
             }
+        },
+        none: {
+          type: String,
+          default: ''
         }
+    },
+    data: function() {
+        return {
+            isShooting: true,
+            topPos: this.none,
+            leftPos: this.none,
+            bgColor: this.none,
+            planePos: function(){
+              return this.plane.getBoundingClientRect();
+            }
+        };
     },
     mounted: function() {
         this.plane = document.querySelector('#plane');
-        this.isShooting = true;
         this.setBarrettPos();
         this.setRandomColor();
     },
     methods: {
+        setPos: function(pos, adjust){
+          return pos + adjust + 'px';
+        },
         setBarrettPos: function() {
-            const { top, left } = this.plane.getBoundingClientRect(),
-                style = this.$el.style;
-
-            style.top = top - this.barretAdjust.top + 'px';
-            style.left = left + this.barretAdjust.left + 'px';
+            const { top : planeTop, left: planeLeft } = this.planePos();
+            this.topPos = this.setPos(planeTop, -this.barretAdjust.top);
+            this.leftPos = this.setPos(planeLeft, this.barretAdjust.left);
         },
         setRandomColor: function() {
-            const [R, G, B] = this.createRandomColor(),
-                style = this.$el.style;
-
-            style.backgroundColor = `rgb(${R}, ${G}, ${B})`;
+            const rgb = this.createRandomColor();
+            this.bgColor = rgb;
         },
         removeBarrett: function() {
             this.$el.remove();
@@ -43,11 +51,11 @@ const Barrett = Vue.extend({
             return Math.round(Math.random() * (max - min + 1)) + min;
         },
         createRandomColor: function() {
-            const R = this.getRandom(100, 255),
-                G = this.getRandom(100, 255),
-                B = this.getRandom(100, 255);
+            const R = this.getRandom(0, 255).toString(16),
+                G = this.getRandom(0, 255).toString(16),
+                B = this.getRandom(100, 255).toString(16);
 
-            return [R, G, B];
+            return `#${R}${G}${B}`;
         }
     }
 });
