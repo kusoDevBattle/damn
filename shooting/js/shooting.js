@@ -184,9 +184,11 @@ Vue.component('shooting-object', {
             this.$parent.addEventListener('shoot', this.avoid, false);
         },
         avoid: function() {
-            if (this.left || this.right || this.hide) {
+            if (this.left || this.right) {
                 return;
             }
+
+            this.resetTargetState();
 
             const random = this.getRandom(0, 4);
 
