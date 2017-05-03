@@ -1,72 +1,115 @@
+body {
+	overflow-x: hidden;
+}
+
 .field {
-  position: relative;
-  background-image: url(../img/sky.png);
-  background-repeat: repeat;
-  height: 100vh;
-  min-height: 500px;
+	background-image: url(../img/sky.png);
+	background-repeat: repeat;
+	height: 100vh;
+	min-height: 500px;
+	position: relative;
 }
 
 .target {
-  position: absolute;
-  top: 10px;
-  left: calc(50% - 167px);
-  width: 335px;
-  height: 250px;
-  max-height: 100%;
-  background: url(../img/rock.png) no-repeat;
-  background-size: cover;
-  animation-duration: 2s;
-  animation-name: flow;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-  transition: left 0.5s;
+	animation-duration: 2s;
+	animation-iteration-count: infinite;
+	animation-name: flow;
+	animation-timing-function: ease-in-out;
+	background: url(../img/rock.png) no-repeat;
+	background-size: cover;
+	height: 250px;
+	left: calc(50% - 167px);
+	max-height: 100%;
+	opacity: 1;
+	position: absolute;
+	top: 10px;
+	transition: left 0.5s;
+	width: 335px;
+}
+
+.target.isSlideLeft {
+	left: -100vw;
+}
+
+.target.isSlideRight {
+	left: 100vw;
+}
+
+.target.isHidden {
+	animation-duration: 1s;
+	animation-iteration-count: 1;
+	animation-name: transparent;
 }
 
 .plane {
-  position: absolute;
-  bottom: 5px;
-  left: calc(50% - 50px);
-  width: 100px;
-  height: 190px;
-  max-height: 100%;
-  background: url(../img/plane.png) no-repeat;
-  background-size: cover;
+	background: url(../img/plane.png) no-repeat;
+	background-size: cover;
+	bottom: 5px;
+	height: 190px;
+	left: calc(50% - 50px);
+	max-height: 100%;
+	position: absolute;
+	width: 100px;
 }
 
 .barrett {
-  width: 20px;
-  height: 50px;
-  position: absolute;
-  border-radius: 100px;
-  background-color: #345C69;
-  animation-name: shoot;
-  animation-iteration-count: 1;
-  animation-duration: 1s;
+	background-color: #345C69;
+	border-radius: 100px;
+	height: 50px;
+	position: absolute;
+	width: 20px;
+	display: none;
+}
+
+.barrett.isShooting {
+	display: block;
+	animation-duration: 1.5s;
+	animation-iteration-count: 1;
+	animation-name: shoot;
 }
 
 .controller {
-  opacity: 0;
-  width: 100%;
-  height: 100%;
+	height: 100%;
+	opacity: 0;
+	width: 100%;
 }
 
 
 @keyframes flow {
-  0% {
-    margin-top: 0px;
-  }
+	0% {
+		margin-top: 0;
+	}
 
-  50% {
-    margin-top: 10px;
-  }
+	50% {
+		margin-top: 10px;
+	}
 }
 
 @keyframes shoot {
-  0% {
-    margin-top: 0px;
-  }
+	0% {
+		margin-top: 0;
+	}
 
-  100% {
-    margin-top: -150vh;
-  }
+	100% {
+		margin-top: -150vh;
+	}
+}
+
+
+@keyframes transparent {
+	0% {
+		opacity: 1;
+	}
+
+	10% {
+		opacity: 0;
+	}
+
+	70% {
+		opacity: 0;
+	}
+
+	100% {
+		opacity: 1;
+	}
 }
