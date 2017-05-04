@@ -1,4 +1,5 @@
 # クソシューティング
+- [GAME START](https://kusodevbattle.github.io/damn/shooting/)
 
 ![SS](../img/ss.png)
 
