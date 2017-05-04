@@ -1,70 +1,87 @@
-const Barrett = Vue.extend({
-    template: '<div class="barrett" :class="{ isShooting: isShooting }" :style="{ top: topPos, left: leftPos, backgroundColor: bgColor }" @animationend="removeBarrett"></div>',
-    props: {
-        barretAdjust: {
-            type: Object,
-            default: function() {
-                return {
-                    top: 50,
-                    left: 80
-                };
+class Weapon {
+  constructor() {
+    this.NormalShot = this._normalShot;
+  }
+  get _normalShot() {
+    return Vue.extend({
+        template: '<div class="normalShot isShooting" \
+          :style="{ top: topPos, left: leftPos, backgroundColor: bgColor }" \
+          @animationend="eraseShot"></div>',
+        props: {
+            adjust: {
+                type: Object,
+                default: function() {
+                    return {
+                        top: 50,
+                        left: 80
+                    };
+                }
+            },
+            none: {
+              type: String,
+              default: ''
             }
         },
-        none: {
-          type: String,
-          default: ''
-        }
-    },
-    data: function() {
-        return {
-            isShooting: true,
-            topPos: this.none,
-            leftPos: this.none,
-            bgColor: this.none,
-            planePos: function(){
-              return this.plane.getBoundingClientRect();
-            }
-        };
-    },
-    mounted: function() {
-        this.plane = document.querySelector('#plane');
-        this.setBarrettPos();
-        this.setRandomColor();
-    },
-    methods: {
-        setPos: function(pos, adjust){
-          return pos + adjust + 'px';
+        data: function() {
+            return {
+                topPos: this.none,
+                leftPos: this.none,
+                bgColor: this.none,
+                planePos: function(){
+                  return this.plane.getBoundingClientRect();
+                },
+                pos: function(){
+                  const { top : planeTop, left: planeLeft } = this.planePos();
+                  return {
+                    top: this.getPos(planeTop, -this.adjust.top),
+                    left: this.getPos(planeLeft, this.adjust.left)
+                  };
+                }
+            };
         },
-        setBarrettPos: function() {
-            const { top : planeTop, left: planeLeft } = this.planePos();
-            this.topPos = this.setPos(planeTop, -this.barretAdjust.top);
-            this.leftPos = this.setPos(planeLeft, this.barretAdjust.left);
+        mounted: function() {
+            this.setPosition();
+            this.setRandomColor();
         },
-        setRandomColor: function() {
-            const rgb = this.createRandomColor();
-            this.bgColor = rgb;
-        },
-        removeBarrett: function() {
-            this.$el.remove();
-        },
-        getRandom: function(min, max) {
-            return Math.round(Math.random() * (max - min + 1)) + min;
-        },
-        createRandomColor: function() {
-            const R = this.getRandom(0, 255).toString(16),
-                G = this.getRandom(0, 255).toString(16),
-                B = this.getRandom(100, 255).toString(16);
+        methods: {
+            getPos: function(pos, adjust){
+              return pos + adjust + 'px';
+            },
+            getRandomHex: function(min, max) {
+                return (Math.round(Math.random() * (max - min + 1)) + min).toString(16);
+            },
+            createRandomColor: function() {
+                const R = this.getRandomHex(0, 255),
+                    G = this.getRandomHex(0, 255),
+                    B = this.getRandomHex(100, 255);
 
-            return `#${R}${G}${B}`;
+                return `#${R}${G}${B}`;
+            },
+            setPosition: function() {
+                const { top, left } = this.pos();
+                this.topPos = top;
+                this.leftPos = left;
+            },
+            setRandomColor: function() {
+                const rgb = this.createRandomColor();
+                this.bgColor = rgb;
+            },
+            eraseShot: function() {
+                this.$el.remove();
+            }
         }
-    }
-});
+    });
+  }
+}
 
 Vue.component('shooting-plane', {
-    template: '<div id="plane" class="plane" @moveLeft="move" @moveRight="move" @shoot="shoot" :style="{ left: pos }"></div>',
+    template: '<div id="plane" class="plane" \
+      :style="{ left: pos }" \
+      @moveLeft="move" @moveRight="move" @shoot="shoot"></div>',
     mounted: function() {
         this.app = this.$el.parentNode;
         this.planeWidth = this.$el.clientWidth;
+        this.weapon = new Weapon();
         this.shootEvent = new Event('shoot', {
             bubbles: true
         });
@@ -83,11 +100,18 @@ Vue.component('shooting-plane', {
         speed: {
             type: Number,
             default: 20
+        },
+        defaultPos: {
+          type: String,
+          default: ''
         }
     },
     data: function() {
         return {
-            pos: '',
+            pos: this.defaultPos,
+            curPos: function(){
+              return this.$el.getBoundingClientRect().left;
+            },
             maxPos: function() {
                 return window.innerWidth - this.planeWidth;
             },
@@ -130,9 +154,8 @@ Vue.component('shooting-plane', {
             }
         },
         getMovePos: function(direction) {
-            const curPos = this.$el.getBoundingClientRect().left,
-                maxPos = this.maxPos();
-            let pos = curPos + this.speed * direction;
+            const maxPos = this.maxPos();
+            let pos = this.curPos() + this.speed * direction;
 
             if (pos < 0) {
                 pos = 0;
@@ -150,20 +173,21 @@ Vue.component('shooting-plane', {
         },
         move: function(e) {
             const direction = this.direction(e.type);
-
             this.pos = this.getMovePos(direction);
         },
         shoot: function() {
-            const barrett = new Barrett().$mount(),
-                el = barrett.$el;
-
-            this.app.appendChild(el);
+            const shot = new this.weapon.NormalShot();
+            shot.plane = this.$el;
+            shot.$mount();
+            this.app.appendChild(shot.$el);
         }
     }
 });
 
 Vue.component('shooting-object', {
-    template: '<div id="target" class="target" :class="{ isSlideLeft: left, isSlideRight: right, isHidden: hide }"></div>',
+    template: '<div id="target" class="target" \
+      :class="{ isSlideLeft: left, isSlideRight: right, isHidden: hide }" \
+      @transitionend="resetTargetPos" @animationend="resetTargetState"></div>',
     mounted: function() {
         this.$parent = this.$el.parentNode;
         this.bindEvent();
@@ -177,11 +201,7 @@ Vue.component('shooting-object', {
     },
     methods: {
         bindEvent: function() {
-            this.$el.addEventListener('webkitTransitionEnd', this.resetTargetPos);
-            this.$el.addEventListener('transitionend', this.resetTargetPos);
-            this.$el.addEventListener('webkitAnimationEnd', this.resetTargetState);
-            this.$el.addEventListener('animationend', this.resetTargetState);
-            this.$parent.addEventListener('shoot', this.avoid, false);
+          this.$parent.addEventListener('shoot', this.avoid, false);
         },
         avoid: function() {
             if (this.left || this.right) {
@@ -211,9 +231,6 @@ Vue.component('shooting-object', {
                     this.hide = true;
                     break;
             }
-        },
-        slideTarget: function(val) {
-            this.$el.style.left = val;
         },
         getRandom: function(min, max) {
             return Math.round(Math.random() * (max - min + 1)) + min;
