@@ -58,16 +58,38 @@ body {
 	height: 50px;
 	position: absolute;
 	width: 20px;
-	display: none;
 }
 
 .normalShot.isShooting {
-	display: block;
 	animation-duration: 1.5s;
 	animation-iteration-count: 1;
 	animation-name: shoot;
 }
 
+.laserShot {
+	position: absolute;
+	background: linear-gradient(to right, #b3dced 0%,#29b8e5 50%,#bce0ee 100%);
+	width: 50px;
+	height: 300vh;
+	margin-top: -300vh;
+	border-radius: 100px;
+}
+
+.laserShot.isShooting,
+.laserShot.isShootEnd {
+	animation-duration: 0.5s;
+	animation-iteration-count: 1;
+}
+
+.laserShot.isShooting {
+	animation-name: laser;
+	transform: scaleX(3);
+}
+
+.laserShot.isShootEnd {
+	animation-name: laserEnd;
+	transform: scaleX(0);
+}
 
 @keyframes flow {
 	0% {
@@ -89,6 +111,25 @@ body {
 	}
 }
 
+@keyframes laser {
+	0% {
+		transform: scaleX(1);
+	}
+
+	100% {
+		transform: scaleX(3);
+	}
+}
+
+@keyframes laserEnd {
+	0% {
+		transform: scaleX(3);
+	}
+
+	100% {
+		transform: scaleX(0);
+	}
+}
 
 @keyframes transparent {
 	0% {

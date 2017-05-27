@@ -1,10 +1,11 @@
 class Weapon {
 	constructor() {
 		this.NormalShot = this._normalShot;
+		this.Laser = this._laserShot;
 	}
 	get _normalShot() {
 		return Vue.extend({
-			template: `<div class="normalShot isShooting"
+			template: `<div class="normalShot isShooting" data-shot="normal"
           :style="{ top: topPos, left: leftPos, backgroundColor: bgColor }"
           @animationend="eraseShot"></div>`,
 			props: {
@@ -79,17 +80,84 @@ class Weapon {
 			}
 		});
 	}
+	get _laserShot(){
+		return Vue.extend({
+			template: `<div class="laserShot isShooting" data-shot="laser"
+			:class="{ isShootEnd: shootEnd }"
+          :style="{ top: topPos, left: leftPos }"
+		  @animationend="eraseShot"></div>`,
+			props: {
+			adjust: {
+				type: Object,
+				default() {
+					return {
+						top: 0,
+						left: 60
+					};
+				}
+			},
+			none: {
+				type: String,
+				default: ''
+			}
+		},
+		data() {
+			return {
+				topPos: this.none,
+				leftPos: this.none,
+				shootEnd: false,
+				planePos() {
+					return this.plane.getBoundingClientRect();
+				},
+				pos() {
+					const {
+						top: planeTop,
+						left: planeLeft
+					} = this.planePos();
+
+					return {
+						top: this.getPos(planeTop),
+						left: this.getPos(planeLeft + this.adjust.left)
+					};
+				}
+			};
+		},
+		mounted() {
+			this.setPosition();
+		},
+		methods: {
+			getPos(pos) {
+				return pos + 'px';
+			},
+			setPosition() {
+				const {
+					top,
+					left
+				} = this.pos();
+
+				this.topPos = top;
+				this.leftPos = left;
+			},
+			eraseShot() {
+				this.$el.remove();
+			}
+		}
+		});
+	}
 }
 
 Vue.component('shooting-plane', {
 	template: `<div id="plane" class="plane"
       :style="{ left: pos }"
-      @moveLeft="move" @moveRight="move" @shoot="shoot"></div>`,
+      @moveLeft="move" @moveRight="move" @shoot="shoot" @shootEnd="shootEnd"></div>`,
 	mounted() {
 		this.app = this.$el.parentNode;
 		this.planeWidth = this.$el.clientWidth;
 		this.weapon = new Weapon();
 		this.shootEvent = new Event('shoot', {
+			bubbles: true
+		});
+		this.shootEndEvent = new Event('shootEnd', {
 			bubbles: true
 		});
 		this.createBarrettEvent = new Event('createBarrett', {
@@ -140,6 +208,7 @@ Vue.component('shooting-plane', {
 		bindEvent() {
 			window.addEventListener('keydown', this.controller, false);
 			window.addEventListener('resize', this.move, false);
+			window.addEventListener('keyup', this.endController, false);
 		},
 		triggerEvent(e) {
 			this.$el.dispatchEvent(e);
@@ -159,6 +228,13 @@ Vue.component('shooting-plane', {
 			// 39: right, 76: l
 			if ([39, 76].includes(key)) {
 				this.triggerEvent(this.moveRightEvent);
+			}
+		},
+		endController(e) {
+			const key = e.which;
+
+			if ([13, 32, 90].includes(key)) {
+				this.triggerEvent(this.shootEndEvent);
 			}
 		},
 		getMovePos(direction) {
@@ -188,14 +264,25 @@ Vue.component('shooting-plane', {
 			shot.plane = this.$el;
 			shot.$mount();
 			this.app.appendChild(shot.$el);
+		},
+		shootEnd() {
+			const target = document.querySelectorAll('[data-shot="laser"]');
+
+			if(target.length === 0) {
+				return;
+			}
+
+			Array.prototype.forEach.call (target, (item) => {
+				item.classList.add('isShootEnd');
+			});
 		}
 	}
 });
 
 Vue.component('shooting-object', {
-	template: '<div id="target" class="target" \
-      :class="{ isSlideLeft: left, isSlideRight: right, isHidden: hide }" \
-      @transitionend="resetTargetPos" @animationend="resetTargetState"></div>',
+	template: `<div id="target" class="target"
+      :class="{ isSlideLeft: left, isSlideRight: right, isHidden: hide }"
+      @transitionend="resetTargetPos" @animationend="resetTargetState"></div>`,
 	mounted() {
 		this.$parent = this.$el.parentNode;
 		this.bindEvent();
