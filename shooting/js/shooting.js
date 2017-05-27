@@ -4,13 +4,13 @@ class Weapon {
 	}
 	get _normalShot() {
 		return Vue.extend({
-			template: '<div class="normalShot isShooting" \
-          :style="{ top: topPos, left: leftPos, backgroundColor: bgColor }" \
-          @animationend="eraseShot"></div>',
+			template: `<div class="normalShot isShooting"
+          :style="{ top: topPos, left: leftPos, backgroundColor: bgColor }"
+          @animationend="eraseShot"></div>`,
 			props: {
 				adjust: {
 					type: Object,
-					default: function() {
+					default() {
 						return {
 							top: 50,
 							left: 80
@@ -22,15 +22,15 @@ class Weapon {
 					default: ''
 				}
 			},
-			data: function() {
+			data() {
 				return {
 					topPos: this.none,
 					leftPos: this.none,
 					bgColor: this.none,
-					planePos: function() {
+					planePos() {
 						return this.plane.getBoundingClientRect();
 					},
-					pos: function() {
+					pos() {
 						const {
 							top: planeTop,
 							left: planeLeft
@@ -42,26 +42,26 @@ class Weapon {
 					}
 				};
 			},
-			mounted: function() {
+			mounted() {
 				this.setPosition();
 				this.setRandomColor();
 			},
 			methods: {
-				getPos: function(pos, adjust) {
+				getPos(pos, adjust) {
 					return pos + adjust + 'px';
 				},
-				getRandomHex: function(min, max) {
+				getRandomHex(min, max) {
 					return (Math.round(Math.random() * (max - min + 1)) + min)
 						.toString(16);
 				},
-				createRandomColor: function() {
+				createRandomColor() {
 					const R = this.getRandomHex(0, 255),
 						G = this.getRandomHex(0, 255),
 						B = this.getRandomHex(100, 255);
 
 					return `#${R}${G}${B}`;
 				},
-				setPosition: function() {
+				setPosition() {
 					const {
 						top,
 						left
@@ -69,11 +69,11 @@ class Weapon {
 					this.topPos = top;
 					this.leftPos = left;
 				},
-				setRandomColor: function() {
+				setRandomColor() {
 					const rgb = this.createRandomColor();
 					this.bgColor = rgb;
 				},
-				eraseShot: function() {
+				eraseShot() {
 					this.$el.remove();
 				}
 			}
@@ -82,10 +82,10 @@ class Weapon {
 }
 
 Vue.component('shooting-plane', {
-	template: '<div id="plane" class="plane" \
-      :style="{ left: pos }" \
-      @moveLeft="move" @moveRight="move" @shoot="shoot"></div>',
-	mounted: function() {
+	template: `<div id="plane" class="plane"
+      :style="{ left: pos }"
+      @moveLeft="move" @moveRight="move" @shoot="shoot"></div>`,
+	mounted() {
 		this.app = this.$el.parentNode;
 		this.planeWidth = this.$el.clientWidth;
 		this.weapon = new Weapon();
@@ -113,17 +113,17 @@ Vue.component('shooting-plane', {
 			default: ''
 		}
 	},
-	data: function() {
+	data() {
 		return {
 			pos: this.defaultPos,
-			curPos: function() {
+			curPos() {
 				return this.$el.getBoundingClientRect()
 					.left;
 			},
-			maxPos: function() {
+			maxPos() {
 				return window.innerWidth - this.planeWidth;
 			},
-			direction: function(eventName) {
+			direction(eventName) {
 				if (eventName === 'moveLeft') {
 					return -1;
 				}
@@ -137,14 +137,14 @@ Vue.component('shooting-plane', {
 		};
 	},
 	methods: {
-		bindEvent: function() {
+		bindEvent() {
 			window.addEventListener('keydown', this.controller, false);
 			window.addEventListener('resize', this.move, false);
 		},
-		triggerEvent: function(e) {
+		triggerEvent(e) {
 			this.$el.dispatchEvent(e);
 		},
-		controller: function(e) {
+		controller(e) {
 			const key = e.which;
 			// 13: enter, 32: space, 90: z
 			if ([13, 32, 90].includes(key)) {
@@ -161,7 +161,7 @@ Vue.component('shooting-plane', {
 				this.triggerEvent(this.moveRightEvent);
 			}
 		},
-		getMovePos: function(direction) {
+		getMovePos(direction) {
 			const maxPos = this.maxPos();
 			let pos = this.curPos() + this.speed * direction;
 
@@ -179,11 +179,11 @@ Vue.component('shooting-plane', {
 
 			return pos + 'px';
 		},
-		move: function(e) {
+		move(e) {
 			const direction = this.direction(e.type);
 			this.pos = this.getMovePos(direction);
 		},
-		shoot: function() {
+		shoot() {
 			const shot = new this.weapon.NormalShot();
 			shot.plane = this.$el;
 			shot.$mount();
@@ -196,11 +196,11 @@ Vue.component('shooting-object', {
 	template: '<div id="target" class="target" \
       :class="{ isSlideLeft: left, isSlideRight: right, isHidden: hide }" \
       @transitionend="resetTargetPos" @animationend="resetTargetState"></div>',
-	mounted: function() {
+	mounted() {
 		this.$parent = this.$el.parentNode;
 		this.bindEvent();
 	},
-	data: function() {
+	data() {
 		return {
 			left: false,
 			right: false,
@@ -208,10 +208,10 @@ Vue.component('shooting-object', {
 		};
 	},
 	methods: {
-		bindEvent: function() {
+		bindEvent() {
 			this.$parent.addEventListener('shoot', this.avoid, false);
 		},
-		avoid: function() {
+		avoid() {
 			if (this.left || this.right) {
 				return;
 			}
@@ -240,13 +240,13 @@ Vue.component('shooting-object', {
 					break;
 			}
 		},
-		getRandom: function(min, max) {
+		getRandom(min, max) {
 			return Math.round(Math.random() * (max - min + 1)) + min;
 		},
-		resetTargetPos: function() {
+		resetTargetPos() {
 			this.left = this.right = false;
 		},
-		resetTargetState: function() {
+		resetTargetState() {
 			this.hide = false;
 		}
 	}
