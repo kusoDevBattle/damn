@@ -339,6 +339,13 @@ Vue.component('shooting-object', {
 	}
 });
 
+Vue.component('weapon-select', {
+	template: `<ul class="weaponSelect">
+		<li class="weapon">Normal</li>
+		<li class="weapon">Laser</li>
+	  </ul>`
+  });
+
 new Vue({
 	el: '#app'
 });
